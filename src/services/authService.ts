@@ -36,7 +36,7 @@ export const loginUser = async (loginData: loginInterface): Promise<loginRespons
   const token = jwt.sign(
     { id: user.id },
     jwtSecret,
-    { expiresIn: '1d' }
+    { expiresIn: '1h' }
   );
 
   const { password: _, ...userWithoutPassword } = user;
