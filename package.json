@@ -1,12 +1,13 @@
 {
   "name": "mini-projeto-fullstack---pt1",
   "version": "1.0.0",
-  "description": "API de autenticação de usuários com Node.js, Express, MongoDB e JWT.",
+  "description": "API de autenticação e CRUD com Node.js, Express, PostgreSQL e Prisma.",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "prisma migrate deploy && tsc",
+    "postinstall": "prisma generate"
   },
   "repository": {
     "type": "git",
