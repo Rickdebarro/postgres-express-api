@@ -1,31 +1,45 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import User from '../models/userModel';
+import * as UserModel from '../models/userModel';
+import { User } from '@prisma/client';
 import { loginInterface } from '../interfaces/loginInterface';
 
-export const loginUser = async (loginData: loginInterface) => {
+
+interface loginResponse {
+  token: string;
+  user: Omit<User, 'password'>;
+}
+
+export const loginUser = async (loginData: loginInterface): Promise<loginResponse> => {
   const { email, password } = loginData;
 
-  const user = await User.findOne({ email }).select('+password');
+  const user = await UserModel.findByEmail(email);
 
   if (!user) {
-    throw new Error('Usuário não encontrado.');
+    console.warn(`[AuthService] Tentativa de login falhada. Utilizador não encontrado: ${email}`);
+    throw new Error('NOT_FOUND');
   }
 
-  const isPasswordMatch = await bcrypt.compare(password!, user.password);
+  const isPasswordMatch = await bcrypt.compare(password, user.password);
+
   if (!isPasswordMatch) {
-    throw new Error('Senha incorreta.');
+    console.warn(`[AuthService] Tentativa de login falhada. Senha incorreta para: ${email}`);
+    throw new Error('UNAUTHORIZED');
   }
 
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    console.error('Chave secreta JWT não foi configurada.');
-    throw new Error('Erro na configuração do servidor.'); // Erro 500
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    console.error('[AuthService] JWT_SECRET não está definido.');
+    throw new Error('JWT_SECRET_NOT_FOUND');
   }
 
-  const token = jwt.sign({ id: user._id }, secret, {
-    expiresIn: '8h',
-  });
+  const token = jwt.sign(
+    { id: user.id },
+    jwtSecret,
+    { expiresIn: '1d' }
+  );
 
-  return { token };
+  const { password: _, ...userWithoutPassword } = user;
+
+  return { token, user: userWithoutPassword };
 };

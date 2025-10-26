@@ -1,23 +1,12 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import { PrismaClient } from '@prisma/client';
 
-dotenv.config();
+/**
+ * Instância global única do PrismaClient (Padrão Singleton).
+ * Isso evita criar uma nova conexão com o banco a cada requisição.
+ */
+const prisma = new PrismaClient({
+  // Descomente para ver todas as queries SQL no seu log
+  // log: ['query'],
+});
 
-const connectDB = async () => {
-  const mongoUri = process.env.MONGO_URI;
-
-  if (!mongoUri) {
-    console.error('ERROR: Database connection string is not defined in environment variables.');
-    process.exit(1);
-  }
-
-  try {
-    await mongoose.connect(mongoUri);
-    console.log('Connected to database successfully');
-  } catch (error) {
-    console.error('Error on database connection', error);
-    process.exit(1);
-  }
-};
-
-export default connectDB;
+export default prisma;
