@@ -5,9 +5,6 @@ interface AuthRequest extends Request {
   userId?: string;
 }
 
-/**
- * faz o Handle de erros das requisições relacionadas as tasks
- */
 const handleError = (res: Response, error: any) => {
   if (error.message === 'NOT_FOUND') {
     return res.status(404).json({ message: 'Tarefa não encontrada.' });
@@ -16,20 +13,15 @@ const handleError = (res: Response, error: any) => {
     return res.status(403).json({ message: 'Acesso negado. Você não é o dono deste recurso.' });
   }
 
-  if (error.name === 'ValidationError') {
-    console.warn(`[TaskController] Erro de validação: ${error.message}`);
-
-    const messages = Object.values(error.errors).map((err: any) => err.message);
-    return res.status(422).json({ message: messages[0] || 'Erro de validação.' });
+  if (error.name === 'PrismaClientValidationError') {
+    console.warn(`[TaskController] Erro de validação do Prisma: ${error.message}`);
+    return res.status(422).json({ message: 'Dados de entrada inválidos ou em falta.' });
   }
 
   console.error(`[TaskController] Erro inesperado: ${error.message}`);
   return res.status(500).json({ message: 'Erro interno do servidor.' });
 };
 
-/**
- * Cria uma nova tarefa.
- */
 export const createTask = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
@@ -48,9 +40,6 @@ export const createTask = async (req: AuthRequest, res: Response) => {
   }
 };
 
-/**
- * Lista todas as tarefas do usuário, com opção de filtro.
- */
 export const getTasks = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
@@ -67,9 +56,6 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
   }
 };
 
-/**
- * Retorna uma tarefa específica pelo ID.
- */
 export const getTaskById = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
@@ -82,9 +68,6 @@ export const getTaskById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-/**
- * Atualiza (substitui) uma tarefa.
- */
 export const updateTaskPut = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
@@ -106,9 +89,6 @@ export const updateTaskPut = async (req: AuthRequest, res: Response) => {
   }
 };
 
-/**
- * PATCH /tasks/:id
- */
 export const updateTaskPatch = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
@@ -125,7 +105,7 @@ export const updateTaskPatch = async (req: AuthRequest, res: Response) => {
     if (description !== undefined) taskData.description = description;
     if (isDone !== undefined) taskData.isDone = isDone;
 
-    const updatedTask = await taskService.updateTask(taskId, taskData, userId, true); // true = isPartial (sim, é parcial, é PATCH)
+    const updatedTask = await taskService.updateTask(taskId, taskData, userId, true);
     
     res.status(200).json(updatedTask);
   } catch (error) {
@@ -133,10 +113,6 @@ export const updateTaskPatch = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
-/**
- * Remove uma tarefa.
- */
 export const deleteTask = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;

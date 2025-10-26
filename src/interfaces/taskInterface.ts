@@ -7,3 +7,7 @@ export interface updateTaskInterface {
   description?: string;
   isDone?: boolean;
 }
+
+export interface filterTaskInterface {
+  isDone?: boolean;
+}
