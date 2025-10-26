@@ -1,38 +1,55 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import prisma from '../database';
+import { Task } from '@prisma/client';
+import { createTaskInterface } from '../interfaces/taskInterface';
+import { updateTaskInterface } from '../interfaces/taskInterface';
 
-
-export interface taskInterface extends Document {
-  description: string;
-  isDone: boolean;
-  user: mongoose.Schema.Types.ObjectId;
-}
-
-
-const TaskSchema: Schema = new Schema(
-  {
-    description: {
-      type: String,
-      required: [true, 'A descrição da tarefa é obrigatória.'],
-      trim: true,
+export const create = async (taskData: createTaskInterface, userId: string): Promise<Task> => {
+  console.log('[TaskModel] Criando tarefa...');
+  return await prisma.task.create({
+    data: {
+      ...taskData,
+      userId: userId,
     },
-    
+  });
+};
 
-    isDone: {
-      type: Boolean,
-      default: false,
+export const findAllByUserId = async (userId: string, filters: { isDone?: boolean }): Promise<Task[]> => {
+  console.log('[TaskModel] Buscando todas as tarefas por userId:', userId);
+  return await prisma.task.findMany({
+    where: {
+      userId: userId,
+      ...filters,
     },
-    
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+    orderBy: {
+      createdAt: 'desc',
     },
-  },
-  {
+  });
+};
 
-    timestamps: true,
-  }
-);
+export const findById = async (taskId: string): Promise<Task | null> => {
+  console.log('[TaskModel] Buscando tarefa por ID:', taskId);
+  return await prisma.task.findUnique({
+    where: {
+      id: taskId,
+    },
+  });
+};
 
+export const update = async (taskId: string, taskData: updateTaskInterface): Promise<Task> => {
+  console.log('[TaskModel] Atualizando tarefa:', taskId);
+  return await prisma.task.update({
+    where: {
+      id: taskId,
+    },
+    data: taskData,
+  });
+};
 
-export default mongoose.model<taskInterface>('Task', TaskSchema);
+export const remove = async (taskId: string): Promise<Task> => {
+  console.log('[TaskModel] Removendo tarefa:', taskId);
+  return await prisma.task.delete({
+    where: {
+      id: taskId,
+    },
+  });
+};
