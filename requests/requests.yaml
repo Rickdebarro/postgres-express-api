@@ -17,7 +17,7 @@ resources:
     created: 1729245600000
     name: Ambiente Produção (Vercel)
     data:
-      baseUrl: "https://express-api-mongodb.rickdebarro.tech"
+      baseUrl: "https://express-api-postgres.rickdebarro.tech"
       authToken: ""
     dataPropertyOrder:
       "&":
@@ -208,7 +208,7 @@ resources:
       mimeType: application/json
       text: |-
         {
-          "description": "Comprar pão (Produção)"
+          "description": "Uma das Tarefas criadas na história"
         }
     parameters: []
     headers:
